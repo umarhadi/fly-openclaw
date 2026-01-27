@@ -1,0 +1,63 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      reset_config:
+        description: 'Reset config to default (deletes existing config)'
+        required: false
+        type: boolean
+        default: false
+      clawdbot_version:
+        description: 'Clawdbot version (main, latest, or specific tag/commit)'
+        required: false
+        type: string
+        default: 'latest'
+
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    concurrency: deploy-group # Ensure only one deployment at a time
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      - name: Set Fly.io secrets from GitHub secrets
+        run: |
+          SECRETS=(
+            "CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}"
+            "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
+          )
+          [ -n "${OPENAI_API_KEY}" ] && SECRETS+=("OPENAI_API_KEY=${OPENAI_API_KEY}")
+          [ -n "${GOOGLE_API_KEY}" ] && SECRETS+=("GOOGLE_API_KEY=${GOOGLE_API_KEY}")
+          [ -n "${DISCORD_BOT_TOKEN}" ] && SECRETS+=("DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}")
+          [ -n "${DISCORD_GUILD_ID}" ] && SECRETS+=("DISCORD_GUILD_ID=${DISCORD_GUILD_ID}")
+          [ -n "${CLOUDFLARE_TUNNEL_TOKEN}" ] && SECRETS+=("CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}")
+          [ -n "${CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH}" ] && SECRETS+=("CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH=${CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH}")
+          [ "${{ inputs.reset_config }}" = "true" ] && SECRETS+=("RESET_CONFIG=true")
+          flyctl secrets set "${SECRETS[@]}" --app "${FLY_APP_NAME}" --stage
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
+          CLAWDBOT_GATEWAY_TOKEN: ${{ secrets.CLAWDBOT_GATEWAY_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
+          CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+          CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH: ${{ secrets.CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH }}
+
+      - run: flyctl deploy --remote-only --app "${FLY_APP_NAME}" --build-arg CLAWDBOT_VERSION="${CLAWDBOT_VERSION}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
+          FLY_REGION: ${{ secrets.FLY_REGION }}
+          CLAWDBOT_VERSION: ${{ inputs.clawdbot_version || 'latest' }}
