@@ -15,7 +15,7 @@ ENV HOMEBREW_NO_AUTO_UPDATE=1
 
 # Create brew wrapper to run as linuxbrew user (Homebrew can't run as root)
 RUN mv /home/linuxbrew/.linuxbrew/bin/brew /home/linuxbrew/.linuxbrew/bin/brew.real && \
-    printf '#!/bin/bash\nexec su - linuxbrew -c \"/home/linuxbrew/.linuxbrew/bin/brew.real $*\"\n' > /home/linuxbrew/.linuxbrew/bin/brew && \
+    printf '#!/bin/bash\nexec sudo -u linuxbrew /home/linuxbrew/.linuxbrew/bin/brew.real "$@"\n' > /home/linuxbrew/.linuxbrew/bin/brew && \
     chmod +x /home/linuxbrew/.linuxbrew/bin/brew
 
 RUN corepack enable
