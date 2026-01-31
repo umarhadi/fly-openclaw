@@ -54,8 +54,8 @@ jobs:
           DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
           OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH: ${{ secrets.OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH }}
-
-      - run: flyctl deploy --remote-only --app "${FLY_APP_NAME}" --build-arg OPENCLAW_VERSION="${OPENCLAW_VERSION}"
+      - name: Deploy
+        run: flyctl deploy --remote-only --app "${FLY_APP_NAME}" --build-arg OPENCLAW_VERSION="${OPENCLAW_VERSION}"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
