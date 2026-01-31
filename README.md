@@ -1,4 +1,4 @@
-# fly-clawdbot
+# fly-openclaw
 Clawdbot running on fly.io
 
 ## Setup Instructions
@@ -17,12 +17,12 @@ This repository contains the configuration to deploy Clawdbot to Fly.io with aut
 
 1. **Create the Fly.io app:**
    ```bash
-   flyctl apps create fly-clawdbot
+   flyctl apps create fly-openclaw
    ```
 
 2. **Create a persistent volume:**
    ```bash
-   flyctl volumes create clawdbot_data --region dfw --size 1
+   flyctl volumes create openclaw_data --region dfw --size 1
    ```
 
 3. **Set up GitHub Actions secrets:**
@@ -31,9 +31,9 @@ This repository contains the configuration to deploy Clawdbot to Fly.io with aut
    
    **Required secrets:**
    - `FLY_API_TOKEN` - Get your token with: `flyctl auth token`
-   - `FLY_APP_NAME` - Your Fly.io app name (e.g., `fly-clawdbot`)
+   - `FLY_APP_NAME` - Your Fly.io app name (e.g., `fly-openclaw`)
    - `FLY_REGION` - Your Fly.io region (e.g., `dfw`)
-   - `CLAWDBOT_GATEWAY_TOKEN` - Generate with: `openssl rand -hex 32`
+   - `OPENCLAW_GATEWAY_TOKEN` - Generate with: `openssl rand -hex 32`
    - `ANTHROPIC_API_KEY` - Your Anthropic API key (e.g., `sk-ant-...`)
    
    **Optional secrets (add as needed):**
@@ -43,7 +43,7 @@ This repository contains the configuration to deploy Clawdbot to Fly.io with aut
    - `DISCORD_GUILD_ID` - Your Discord server/guild ID (automatically replaces `YOUR_GUILD_ID` placeholder in config)
    - Add other channel tokens as needed
    - `CLOUDFLARE_TUNNEL_TOKEN` - Cloudflare Tunnel token (for private access)
-   - `CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH` - Set to `true` to allow token-only Control UI auth over tunnels (skips device pairing)
+   - `OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH` - Set to `true` to allow token-only Control UI auth over tunnels (skips device pairing)
 
 4. **Deploy:**
    - Push to the `main` branch to trigger automatic deployment via GitHub Actions
@@ -69,7 +69,7 @@ After deployment, you can:
      (example: `https://jarvis.example.com/`).
    - Otherwise, use `flyctl open` or `https://{your-app-name}.fly.dev/`.
    
-   The default config is automatically created on first run. You can customize it through the UI or by editing `/data/clawdbot.json` directly.
+   The default config is automatically created on first run. You can customize it through the UI or by editing `/data/openclaw.json` directly.
 
 2. **View logs:**
    ```bash
@@ -81,14 +81,14 @@ After deployment, you can:
    flyctl ssh console
    ```
    
-   You can edit the config file at `/data/clawdbot.json` if needed. The default config includes:
+   You can edit the config file at `/data/openclaw.json` if needed. The default config includes:
    - Discord integration enabled (requires `DISCORD_BOT_TOKEN` environment variable)
    - Placeholder guild ID (`YOUR_GUILD_ID`) that gets automatically replaced with your actual Discord server ID from the `DISCORD_GUILD_ID` environment variable on startup
    - Claude Opus 4.5 as primary model with Sonnet 4.5 and GPT-4o as fallbacks
 
 ### Customizing the Configuration
 
-The application automatically creates a default config at `/data/clawdbot.json` on first startup. To customize:
+The application automatically creates a default config at `/data/openclaw.json` on first startup. To customize:
 
 1. **Via the Control UI** (recommended):
    - Access the UI at your Cloudflare Tunnel hostname (recommended), or
@@ -98,7 +98,7 @@ The application automatically creates a default config at `/data/clawdbot.json` 
 
 2. **Via SSH** (advanced):
    - SSH into the machine: `flyctl ssh console`
-   - Edit the config: `vi /data/clawdbot.json`
+   - Edit the config: `vi /data/openclaw.json`
    - Note: If you set the `DISCORD_GUILD_ID` environment variable, the `YOUR_GUILD_ID` placeholder will be automatically replaced on each startup
    - Add or modify channels, agents, or other settings
    - Exit and the changes will take effect (may require restart)
@@ -111,26 +111,26 @@ If you need to build the Docker image locally with a specific version:
 
 ```bash
 # Use the latest release (default)
-docker build --build-arg CLAWDBOT_VERSION=latest -t fly-clawdbot .
+docker build --build-arg OPENCLAW_VERSION=latest -t fly-openclaw .
 
 # Use the main branch
-docker build --build-arg CLAWDBOT_VERSION=main -t fly-clawdbot .
+docker build --build-arg OPENCLAW_VERSION=main -t fly-openclaw .
 
 # Use a specific tag
-docker build --build-arg CLAWDBOT_VERSION=v1.2.3 -t fly-clawdbot .
+docker build --build-arg OPENCLAW_VERSION=v1.2.3 -t fly-openclaw .
 
 # Use a specific commit
-docker build --build-arg CLAWDBOT_VERSION=abc1234 -t fly-clawdbot .
+docker build --build-arg OPENCLAW_VERSION=abc1234 -t fly-openclaw .
 ```
 
 ### Troubleshooting
 
 - **OOM/Memory Issues:** The fly.toml is configured with 2GB RAM (recommended). If issues persist, increase memory.
 - **Gateway lock issues:** If the gateway won't start, delete lock files: `flyctl ssh console -C "rm -f /data/gateway.*.lock"`
-- **Config not persisting:** Ensure `CLAWDBOT_STATE_DIR=/data` is set (already configured in fly.toml)
+- **Config not persisting:** Ensure `OPENCLAW_STATE_DIR=/data` is set (already configured in fly.toml)
 - **Cloudflare Tunnel not reachable:** Ensure `CLOUDFLARE_TUNNEL_TOKEN` is set and the tunnel
   points to `http://127.0.0.1:3000`
-- **Control UI token rejected over tunnel:** Set `CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH=true` and redeploy to allow token-only auth (skips device pairing).
+- **Control UI token rejected over tunnel:** Set `OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH=true` and redeploy to allow token-only auth (skips device pairing).
 - **Discord bot doesn't respond:**
   - Ensure `DISCORD_BOT_TOKEN` is set in secrets and the app was redeployed.
   - Ensure `DISCORD_GUILD_ID` is set in secrets. The placeholder `YOUR_GUILD_ID` in the config will be automatically replaced on startup.

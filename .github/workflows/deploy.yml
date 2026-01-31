@@ -11,7 +11,7 @@ on:
         required: false
         type: boolean
         default: false
-      clawdbot_version:
+      openclaw_version:
         description: 'Clawdbot version (main, latest, or specific tag/commit)'
         required: false
         type: string
@@ -32,7 +32,7 @@ jobs:
       - name: Set Fly.io secrets from GitHub secrets
         run: |
           SECRETS=(
-            "CLAWDBOT_GATEWAY_TOKEN=${CLAWDBOT_GATEWAY_TOKEN}"
+            "OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}"
             "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}"
           )
           [ -n "${OPENAI_API_KEY}" ] && SECRETS+=("OPENAI_API_KEY=${OPENAI_API_KEY}")
@@ -40,24 +40,24 @@ jobs:
           [ -n "${DISCORD_BOT_TOKEN}" ] && SECRETS+=("DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}")
           [ -n "${DISCORD_GUILD_ID}" ] && SECRETS+=("DISCORD_GUILD_ID=${DISCORD_GUILD_ID}")
           [ -n "${CLOUDFLARE_TUNNEL_TOKEN}" ] && SECRETS+=("CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}")
-          [ -n "${CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH}" ] && SECRETS+=("CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH=${CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH}")
+          [ -n "${OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH}" ] && SECRETS+=("OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH=${OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH}")
           [ "${{ inputs.reset_config }}" = "true" ] && SECRETS+=("RESET_CONFIG=true")
           flyctl secrets set "${SECRETS[@]}" --app "${FLY_APP_NAME}" --stage
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
-          CLAWDBOT_GATEWAY_TOKEN: ${{ secrets.CLAWDBOT_GATEWAY_TOKEN }}
+          OPENCLAW_GATEWAY_TOKEN: ${{ secrets.OPENCLAW_GATEWAY_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID }}
           CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
-          CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH: ${{ secrets.CLAWDBOT_CONTROL_UI_ALLOW_INSECURE_AUTH }}
+          OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH: ${{ secrets.OPENCLAW_CONTROL_UI_ALLOW_INSECURE_AUTH }}
 
-      - run: flyctl deploy --remote-only --app "${FLY_APP_NAME}" --build-arg CLAWDBOT_VERSION="${CLAWDBOT_VERSION}"
+      - run: flyctl deploy --remote-only --app "${FLY_APP_NAME}" --build-arg OPENCLAW_VERSION="${OPENCLAW_VERSION}"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           FLY_APP_NAME: ${{ secrets.FLY_APP_NAME }}
           FLY_REGION: ${{ secrets.FLY_REGION }}
-          CLAWDBOT_VERSION: ${{ inputs.clawdbot_version || 'latest' }}
+          OPENCLAW_VERSION: ${{ inputs.openclaw_version || 'latest' }}
