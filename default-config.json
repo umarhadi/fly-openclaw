@@ -1,11 +1,32 @@
 {
+  "meta": {
+    "lastTouchedVersion": "2026.1.29"
+  },
+  "logging": {
+    "level": "debug",
+    "consoleLevel": "debug",
+    "consoleStyle": "json",
+    "redactSensitive": "tools"
+  },
+  "ui": {
+    "assistant": {
+      "name": "AI Assistant"
+    }
+  },
   "agents": {
     "defaults": {
       "model": {
-        "primary": "anthropic/claude-opus-4-5",
-        "fallbacks": ["anthropic/claude-sonnet-4-5", "openai/gpt-4o"]
+        "primary": "anthropic/claude-sonnet-4-5",
+        "fallbacks": [
+          "anthropic/claude-opus-4-5",
+          "openai/gpt-4o"
+        ]
       },
-      "maxConcurrent": 4
+      "workspace": "/data/.openclaw/workspace",
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
     },
     "list": [
       {
@@ -20,12 +41,56 @@
       "openai:default": { "mode": "token", "provider": "openai" }
     }
   },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "perplexity",
+        "timeoutSeconds": 60
+      },
+      "fetch": {
+        "enabled": true
+      }
+    },
+    "subagents": {
+      "tools": {
+        "allow": []
+      }
+    }
+  },
   "bindings": [
     {
       "agentId": "main",
       "match": { "channel": "discord" }
+    },
+    {
+      "agentId": "main",
+      "match": { "channel": "whatsapp" }
+    },
+    {
+      "agentId": "main",
+      "match": { "channel": "telegram" }
+    },
+    {
+      "agentId": "main",
+      "match": { "channel": "slack" }
     }
   ],
+  "messages": {
+    "messagePrefix": "[AI]",
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "bash": true,
+    "config": true,
+    "debug": true
+  },
+  "cron": {
+    "enabled": true,
+    "maxConcurrentRuns": 5
+  },
   "channels": {
     "discord": {
       "enabled": true,
@@ -36,13 +101,98 @@
           "requireMention": false
         }
       }
+    },
+    "whatsapp": {
+      "accounts": {},
+      "markdown": {
+        "tables": "bullets"
+      },
+      "sendReadReceipts": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [],
+      "groupPolicy": "allowlist",
+      "dms": {},
+      "mediaMaxMb": 50,
+      "actions": {
+        "reactions": true,
+        "sendMessage": true,
+        "polls": true
+      },
+      "debounceMs": 0,
+      "heartbeat": {
+        "showOk": true,
+        "showAlerts": true,
+        "useIndicator": true
+      }
+    },
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "allowFrom": [],
+      "groupAllowFrom": [],
+      "groupPolicy": "allowlist",
+      "dms": {},
+      "streamMode": "partial",
+      "actions": {
+        "reactions": true,
+        "sendMessage": true,
+        "deleteMessage": true,
+        "sticker": true
+      },
+      "linkPreview": true
+    },
+    "slack": {
+      "mode": "socket",
+      "webhookPath": "/slack/events",
+      "enabled": true,
+      "userTokenReadOnly": true,
+      "groupPolicy": "open",
+      "textChunkLimit": 4000,
+      "mediaMaxMb": 20,
+      "reactionNotifications": "own",
+      "reactionAllowlist": [],
+      "replyToMode": "off",
+      "actions": {
+        "reactions": true,
+        "messages": true,
+        "pins": true,
+        "memberInfo": true,
+        "emojiList": true
+      },
+      "slashCommand": {
+        "enabled": true,
+        "name": "ai",
+        "sessionPrefix": "slack:slash",
+        "ephemeral": true
+      },
+      "dm": {
+        "enabled": true,
+        "policy": "pairing",
+        "allowFrom": ["*"],
+        "groupEnabled": false,
+        "groupChannels": ["*"],
+        "replyToMode": "all"
+      }
     }
   },
   "gateway": {
     "mode": "local",
-    "bind": "auto"
+    "bind": "lan",
+    "controlUi": {
+      "allowInsecureAuth": true
+    }
   },
-  "meta": {
-    "lastTouchedVersion": "2026.1.24"
+  "plugins": {
+    "entries": {
+      "whatsapp": {
+        "enabled": true
+      },
+      "telegram": {
+        "enabled": true
+      },
+      "slack": {
+        "enabled": true
+      }
+    }
   }
 }
