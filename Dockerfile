@@ -4,26 +4,6 @@ FROM node:24-bookworm
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Install dependencies + sudo (if keeping wrapper approach)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends sudo git ca-certificates curl gnupg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Homebrew as linuxbrew user
-RUN useradd -m -s /bin/bash linuxbrew && \
-    echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-USER linuxbrew
-RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-USER root
-
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
-ENV HOMEBREW_NO_AUTO_UPDATE=1
-
-# Fix permissions so root can use brew directly
-RUN chown -R root:root /home/linuxbrew/.linuxbrew
-
 RUN corepack enable
 
 # Install git to clone the repository and cloudflared for tunnel access
