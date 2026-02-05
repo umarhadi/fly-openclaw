@@ -20,7 +20,7 @@ on:
 jobs:
   deploy:
     name: Deploy app
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-deploy
     concurrency: deploy-group # Ensure only one deployment at a time
     permissions:
       contents: read
